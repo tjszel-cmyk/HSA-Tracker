@@ -1,5 +1,5 @@
 // 🔧 Replace this with your actual Web App URL
-const WEB_APP_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby3-RxnANNqECiBiEbPv0HgiK5fS6286GjcsVTgHU5WfOggH0L_ktCvlyoVM7Tv7c60/exec";
 
 // Wait for the page to load
 document.addEventListener("DOMContentLoaded", function () {
