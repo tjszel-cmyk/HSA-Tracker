@@ -1,188 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>HSA Receipt Tracker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>HSA Expense Entry</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
 
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      margin: 0;
-      padding: 16px;
-      background-color: #f5f5f5;
-    }
-    .container {
-      max-width: 480px;
-      margin: 0 auto;
-      background: #ffffff;
-      padding: 16px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    h1 {
-      font-size: 1.4rem;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-    label {
-      display: block;
-      margin-top: 12px;
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-    input, select, textarea, button {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 10px;
-      margin-top: 4px;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    textarea {
-      min-height: 70px;
-      resize: vertical;
-    }
-    .button-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 16px;
-    }
-    .button-row button {
-      flex: 1;
-      cursor: pointer;
-      border: none;
-      color: #fff;
-      font-weight: 600;
-    }
-    .btn-save {
-      background-color: #007bff;
-    }
-    .btn-history {
-      background-color: #28a745;
-    }
-    .message {
-      margin-top: 12px;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-    .message.success {
-      color: #28a745;
-    }
-    .message.error {
-      color: #dc3545;
-    }
-  </style>
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        form {
+            max-width: 400px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+    </style>
 </head>
+
 <body>
-  <div class="container">
-    <h1>HSA Receipt Entry</h1>
 
-    <label for="date">Date</label>
-    <input type="date" id="date" name="date">
+    <h1>Enter HSA Expense</h1>
 
-    <label for="name">Name</label>
-    <select id="name" name="name">
-      <option value="Tom">Tom</option>
-      <option value="Cathy">Cathy</option>
-    </select>
+    <form id="expense-form">
+        <label for="date">Date</label>
+        <input type="date" id="date" required>
 
-    <label for="amount">Expense (dollars and cents)</label>
-    <input type="number" id="amount" name="amount" step="0.01" min="0" inputmode="decimal" placeholder="0.00">
+        <label for="name">Name</label>
+        <input type="text" id="name" placeholder="Provider or Store" required>
 
-    <label for="description">Description</label>
-    <textarea id="description" name="description" placeholder="Describe the expense"></textarea>
+        <label for="amount">Amount</label>
+        <input type="number" id="amount" step="0.01" required>
 
-    <div class="button-row">
-      <button class="btn-save" id="saveBtn">Save</button>
-      <button class="btn-history" id="historyBtn">Show History</button>
-    </div>
+        <label for="description">Description</label>
+        <textarea id="description" rows="3" placeholder="What was this expense for?" required></textarea>
 
-    <div id="message" class="message"></div>
-  </div>
+        <button type="submit">Save Expense</button>
+    </form>
 
-  <script>
-    // Replace this with your Apps Script web app URL
-    const SCRIPT_URL = 'PUT_YOUR_WEB_APP_URL_HERE';
+    <button onclick="window.location.href='history.html'" style="margin-top:20px;">
+        View History
+    </button>
 
-    function setTodayAsDefaultDate() {
-      const dateInput = document.getElementById('date');
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, '0');
-      const dd = String(today.getDate()).padStart(2, '0');
-      dateInput.value = `${yyyy}-${mm}-${dd}`;
-    }
+    <!-- Load your JavaScript file -->
+    <script src="script.js"></script>
 
-    async function saveEntry() {
-      const messageEl = document.getElementById('message');
-      messageEl.textContent = '';
-      messageEl.className = 'message';
-
-      const date = document.getElementById('date').value;
-      const name = document.getElementById('name').value;
-      const amount = document.getElementById('amount').value;
-      const description = document.getElementById('description').value;
-
-      if (!date || !name || !amount) {
-        messageEl.textContent = 'Please fill in date, name, and amount.';
-        messageEl.classList.add('error');
-        return;
-      }
-
-      const payload = {
-        date,
-        name,
-        amount,
-        description
-      };
-
-      try {
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
-
-        // Try to read JSON; if CORS blocks, we still assume success if no error thrown
-        let ok = response.ok;
-        try {
-          const data = await response.json();
-          if (data && data.status === 'ok') {
-            ok = true;
-          }
-        } catch (e) {
-          // Ignore JSON parse errors; rely on HTTP status
-        }
-
-        if (ok) {
-          messageEl.textContent = 'Entry saved.';
-          messageEl.classList.add('success');
-          // Clear amount and description, keep date and name
-          document.getElementById('amount').value = '';
-          document.getElementById('description').value = '';
-        } else {
-          messageEl.textContent = 'Error saving entry.';
-          messageEl.classList.add('error');
-        }
-      } catch (err) {
-        messageEl.textContent = 'Network error while saving entry.';
-        messageEl.classList.add('error');
-      }
-    }
-
-    function goToHistory() {
-      window.location.href = 'history.html';
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      setTodayAsDefaultDate();
-      document.getElementById('saveBtn').addEventListener('click', saveEntry);
-      document.getElementById('historyBtn').addEventListener('click', goToHistory);
-    });
-  </script>
 </body>
 </html>
